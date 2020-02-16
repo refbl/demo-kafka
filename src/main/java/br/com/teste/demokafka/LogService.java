@@ -6,16 +6,15 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
+import java.util.regex.Pattern;
 
-public class AvaliaPedidoService {
+public class LogService {
     public static void main(String[] args) {
         var consumer = new KafkaConsumer<String, String>(properties());
 
-        // Subscreve-se para ouvir um tópico
-        consumer.subscribe(Collections.singletonList("LOJA_NOVO_PEDIDO"));
+        // Subscreve-se em qualquer tópico que começa com LOJA - usa Expressão Regular
+        consumer.subscribe(Pattern.compile("LOJA.*"));
 
         while (true) {
             var registros = consumer.poll(Duration.ofMillis(100));
@@ -24,18 +23,12 @@ public class AvaliaPedidoService {
                 System.out.println(" Processando " + registros.count() + " registros");
 
                 for (var registro : registros) {
-                    System.out.println("Processando NOVO Pedido:   key "
+                    System.out.println("LOG : " + registro.topic() + " key "
                             + registro.key()
                             + " :: Valor "
                             + registro.value()
                             + " Particao " + registro.partition()
                             + " offset " + registro.offset());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("Novo Pedido Processado com Sucesso.");
                 }
             }
         }
@@ -46,10 +39,7 @@ public class AvaliaPedidoService {
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, AvaliaPedidoService.class.getSimpleName());
-        properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, AvaliaPedidoService.class.getSimpleName() + "-" + UUID.randomUUID().toString());
-        //Diminui a Leitura de Registros no poll para garantir o commit caso haja rebalancing
-        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, LogService.class.getSimpleName());
 
         return properties;
     }
