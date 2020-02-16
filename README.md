@@ -1,7 +1,9 @@
 ﻿# demo-kafka
 Demo serviços Kafka (Producer / Consumer)
 
-Referencia: http://kafka.apache.org/quickstart
+Referencias: 
+     => http://kafka.apache.org/quickstart
+     => Treinamento Alura - Kafka: Introdução a streams em microsserviços
 
 1. Instalação Kafka
  - Acessar http://kafka.apache.org/downloads
